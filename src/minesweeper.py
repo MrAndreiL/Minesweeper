@@ -14,10 +14,6 @@ def game_display():
     pass
 
 
-def end_display():
-    pass
-
-
 def main():
     """Start the game's development.
 
@@ -26,12 +22,11 @@ def main():
     information from the user, such as the number of columns, rows,
     bombs or the number of seconds.
     The second one, the minesweeper game ready to be played.
+    The third one, a display that shows the games' result.
     """
     info_display()
 
     game_display()
-
-    end_display()
 
 
 if __name__ == "__main__":

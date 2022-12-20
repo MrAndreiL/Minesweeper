@@ -1,10 +1,20 @@
 #!/usr/bin/python3
+from utils import info_board
+
 
 def info_display():
-    pass
+    # Create the info board object.
+    board = info_board.InfoBoard()
+
+    # Open up the game/display loop.
+    board.display_loop()
 
 
 def game_display():
+    pass
+
+
+def end_display():
     pass
 
 
@@ -20,6 +30,8 @@ def main():
     info_display()
 
     game_display()
+
+    end_display()
 
 
 if __name__ == "__main__":

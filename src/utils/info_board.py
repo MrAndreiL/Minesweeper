@@ -167,6 +167,16 @@ class InfoBoard:
                 start_rect.h
         )
 
+        # Import game icon.
+        try:
+            base_path = os.path.dirname(__file__)
+            icon_path = os.path.join(base_path, "assets/icon.png")
+            icon_img = pygame.image.load(icon_path).convert()
+        except Exception as exp:
+            print("Cannot import game icon", exp)
+        # Set game icon.
+        pygame.display.set_icon(icon_img)
+
         running = True
         while running:
             # Loop through the event list.

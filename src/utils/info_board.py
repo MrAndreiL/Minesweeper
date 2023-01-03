@@ -1,6 +1,7 @@
 import pygame
 import utils.text as text
 import utils.input_box as input_box
+import os
 
 
 class InfoBoard:
@@ -151,6 +152,21 @@ class InfoBoard:
         inputs.add(bomb_input)
         inputs.add(sec_input)
 
+        # Import start image from assets folder as object surface.
+        try:
+            base_path = os.path.dirname(__file__)
+            start_path = os.path.join(base_path, "assets/start_button.png")
+            start_img = pygame.image.load(start_path).convert()
+            start_rect = start_img.get_rect()
+        except Exception as exp:
+            print("Exception occrrend when importing asset", exp)
+        start_rect = pygame.Rect(
+                self.board_width // 2 - start_rect.w // 2,
+                300,
+                start_rect.w,
+                start_rect.h
+        )
+
         running = True
         while running:
             # Loop through the event list.
@@ -161,6 +177,10 @@ class InfoBoard:
                 # Input handling.
                 for inp in inputs:
                     inp.handle_event(event)
+                # Test if start button was pressed correctly.
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_rect.collidepoint(event.pos):
+                        running = False
 
             # Fill the screen with white.
             self.board.fill(self.__WHITE)
@@ -174,8 +194,14 @@ class InfoBoard:
                 pygame.draw.rect(self.board, self.__LGRAY, inp.rect)
                 self.board.blit(inp.text_surf, inp.rect)
 
+            # Display start image.
+            self.board.blit(start_img, start_rect)
+
             # Update the display.
             pygame.display.flip()
 
             # Ensure cpu clock frame.
             self.clock.tick(self.__FRAMES)
+
+        # Cleanup.
+        pygame.quit()

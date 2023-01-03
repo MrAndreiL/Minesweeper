@@ -66,6 +66,14 @@ class InfoBoard:
         text blocks and buttons and
         updates graphical table constantly."""
 
+        # Add Minesweeper game title to starting screen.
+        game_text = text.TextLabel("Minesweeper", self.__BLACK,
+                                   self.font, self.font_size + 10)
+        game_text.set_rectangle(
+                (self.board_width // 2) - (game_text.rect.w // 2),
+                30
+        )
+
         # Create labels and input spaces, group them and display them.
         rows_label = text.TextLabel("Number of rows:", self.__BLACK,
                                     self.font, self.font_size)
@@ -140,6 +148,7 @@ class InfoBoard:
 
         # Create sprite label groups for better management.
         labels = pygame.sprite.Group()
+        labels.add(game_text)
         labels.add(rows_label)
         labels.add(col_label)
         labels.add(bomb_label)

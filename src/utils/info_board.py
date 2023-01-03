@@ -27,11 +27,18 @@ class InfoBoard:
         self.board_width = 400
         self.board_height = 400
 
+        # Input default values.
+        self.bombs = 10
+        self.rows = 9
+        self.columns = 9
+        self.seconds = 120
+
         # Color codes used.
         self.__WHITE = (255, 255, 255)
         self.__BLACK = (0, 0, 0)
         self.__LGRAY = (211, 211, 211)
         self.__DGRAY = (169, 169, 169)
+        self.__RED = (255, 0, 0)
 
         # Text info.
         self.font = 'freesansbold.ttf'
@@ -58,6 +65,54 @@ class InfoBoard:
         self.clock = pygame.time.Clock()
 
         pygame.display.set_caption('Minesweeper')
+
+    def validate_input(self, rows_label, col_label, bomb_label, sec_label):
+        """Validates user input in order to generate table.
+
+        Given all available labels, performs validation
+        regarding the values provided. Also updates the color
+        based on the assertion.
+
+        Args:
+            rows_label: Label text object with assoc input field for rows.
+            col_label: Label text object with assoc input field for columns
+            bomb_label: Label text object with assoc input field for bombs
+            sec_label: Label text object with assoc input field for seconds
+        Returns:
+            A boolean value representing the validation conclusion.
+        """
+        rows = rows_label.validate_rows()
+        if rows:
+            rows_label.update_color(self.__BLACK)
+        else:
+            rows_label.update_color(self.__RED)
+
+        cols = col_label.validate_cols()
+        if cols:
+            col_label.update_color(self.__BLACK)
+        else:
+            col_label.update_color(self.__RED)
+
+        bombs = bomb_label.validate_bombs(rows_label.inp.get_text(),
+                                          col_label.inp.get_text())
+        if bombs:
+            bomb_label.update_color(self.__BLACK)
+        else:
+            bomb_label.update_color(self.__RED)
+
+        seconds = sec_label.validate_seconds()
+        if seconds:
+            sec_label.update_color(self.__BLACK)
+        else:
+            sec_label.update_color(self.__RED)
+
+        # Update board info for later retrieval.
+        self.rows = rows_label.inp.get_text()
+        self.columns = col_label.inp.get_text()
+        self.bombs = bomb_label.inp.get_text()
+        self.seconds = sec_label.inp.get_text()
+
+        return (rows and cols) and (bombs and seconds)
 
     def display_loop(self):
         """Creates and maintains the main display loop.
@@ -92,6 +147,8 @@ class InfoBoard:
                 self.font_size,
                 '9'
         )
+        rows_label.set_input_box(rows_input)
+
         col_label = text.TextLabel("Number of columns:", self.__BLACK,
                                    self.font, self.font_size)
         col_label.set_rectangle(
@@ -109,6 +166,7 @@ class InfoBoard:
                 self.font_size,
                 '9'
         )
+        col_label.set_input_box(col_input)
 
         bomb_label = text.TextLabel("Number of bombs:", self.__BLACK,
                                     self.font, self.font_size)
@@ -127,6 +185,7 @@ class InfoBoard:
                 self.font_size,
                 '10'
         )
+        bomb_label.set_input_box(bomb_input)
 
         sec_label = text.TextLabel("Number of seconds:", self.__BLACK,
                                    self.font, self.font_size)
@@ -145,6 +204,7 @@ class InfoBoard:
                 self.font_size,
                 '120'
         )
+        sec_label.set_input_box(sec_input)
 
         # Create sprite label groups for better management.
         labels = pygame.sprite.Group()
@@ -199,7 +259,11 @@ class InfoBoard:
                 # Test if start button was pressed correctly.
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if start_rect.collidepoint(event.pos):
-                        running = False
+                        # If so, assert the input given by the player.
+                        running = not self.validate_input(
+                                rows_label, col_label,
+                                bomb_label, sec_label
+                        )
 
             # Fill the screen with white.
             self.board.fill(self.__WHITE)

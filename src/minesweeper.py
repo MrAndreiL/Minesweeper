@@ -3,14 +3,35 @@ from utils import info_board
 
 
 def info_display():
+    """Provies the user with the initial display.
+
+    Initially, a board is created to retrieve the user's
+    options regarding the game's parameters(rows, columns, bombs and
+    game seconds). Default values for these fields are provided.
+
+    Returns:
+        A board object with the filled in data.
+    """
     # Create the info board object.
     board = info_board.InfoBoard()
 
     # Open up the game/display loop.
     board.display_loop()
 
+    return board
 
-def game_display():
+
+def game_display(board):
+    """Main game display with the actual minesweeper game.
+
+    Using the information provided by the initial info board,
+    the game board is then built up and the game is ready to be
+    played.
+
+    Args:
+        board: A reference to the aforementioned info board.
+            Contains input data necessary to build up the game board.
+    """
     pass
 
 
@@ -24,9 +45,9 @@ def main():
     The second one, the minesweeper game ready to be played.
     The third one, a display that shows the games' result.
     """
-    info_display()
+    board = info_display()
 
-    game_display()
+    game_display(board)
 
 
 if __name__ == "__main__":

@@ -55,12 +55,6 @@ class InfoBoard:
             self.board_height)
         )
 
-        # User input defaults.
-        self.rows = 8
-        self.columns = 8
-        self.bombs = 10
-        self.seconds = 120
-
         # CPU clock of the game.
         self.clock = pygame.time.Clock()
 
@@ -119,7 +113,8 @@ class InfoBoard:
 
         Builds up the infinite loop, manages events, displays
         text blocks and buttons and
-        updates graphical table constantly."""
+        updates graphical table constantly.
+        """
 
         # Add Minesweeper game title to starting screen.
         game_text = text.TextLabel("Minesweeper", self.__BLACK,

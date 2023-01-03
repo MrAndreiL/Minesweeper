@@ -57,6 +57,10 @@ class InputBox(pygame.sprite.Sprite):
         current state of the input box into either active or inactive.
         Moreover, makes sure only digits are allowed to be written and
         dynamically changes the displayed text.
+
+        Args:
+            event: Pygame specific event object, used to determine
+                    it's type and take specific actions acordingly.
         """
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
@@ -88,5 +92,9 @@ class InputBox(pygame.sprite.Sprite):
                                                    (0, 0, 0))
 
     def get_text(self):
-        """Returns an integer form of the current displayed text."""
+        """Returns an integer form of the current displayed text.
+
+        Returns:
+            An integer variant of the string text currently on display.
+        """
         return int(self.text)

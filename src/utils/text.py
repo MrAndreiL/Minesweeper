@@ -40,7 +40,16 @@ class TextLabel(pygame.sprite.Sprite):
         self.inp = None
 
     def set_rectangle(self, x, y):
-        """Positions the rectangle to a newer spot."""
+        """Positions the rectangle to a newer spot.
+
+        By default, a rectangle is created at (0, 0).
+        In order to be better manipulated, this function
+        moves the rectangle's coordinates to a desired spot.
+
+        Args:
+            x: X coordinate
+            y: Y coordinate
+        """
         self.rect.x = x
         self.rect.y = y
 
@@ -61,11 +70,23 @@ class TextLabel(pygame.sprite.Sprite):
         self.inp = inp
 
     def validate_rows(self):
-        """Validates the input rows asssociated with this text label."""
+        """Validates the input rows asssociated with this text label.
+
+        The number of rows in this game has to be between 5 and 50.
+
+        Returns:
+            A boolean value representing this assertion.
+        """
         return (5 <= self.inp.get_text() and self.inp.get_text() <= 50)
 
     def validate_cols(self):
-        """Validates the input columns associated with this label."""
+        """Validates the input columns associated with this label.
+
+        The number of columns in this game has to be between 5 and 50.
+
+        Returns:
+            A boolean value representing this assertion.
+        """
         return (5 <= self.inp.get_text() and self.inp.get_text() <= 50)
 
     def validate_bombs(self, rows, cols):
@@ -81,9 +102,9 @@ class TextLabel(pygame.sprite.Sprite):
 
         Returns:
             A boolean value that represents the validaton.
-        """ 
+        """
         return self.inp.get_text() <= (rows * cols)
-    
+
     def validate_seconds(self):
         """Validates input seconds.
 

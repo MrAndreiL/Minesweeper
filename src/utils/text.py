@@ -77,7 +77,7 @@ class TextLabel(pygame.sprite.Sprite):
         Returns:
             A boolean value representing this assertion.
         """
-        return (5 <= self.inp.get_text() and self.inp.get_text() <= 50)
+        return (9 <= self.inp.get_text() and self.inp.get_text() <= 30)
 
     def validate_cols(self):
         """Validates the input columns associated with this label.
@@ -87,7 +87,7 @@ class TextLabel(pygame.sprite.Sprite):
         Returns:
             A boolean value representing this assertion.
         """
-        return (5 <= self.inp.get_text() and self.inp.get_text() <= 50)
+        return (9 <= self.inp.get_text() and self.inp.get_text() <= 70)
 
     def validate_bombs(self, rows, cols):
         """Validates the number of bombs given as input.

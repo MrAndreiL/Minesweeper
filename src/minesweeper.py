@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from utils import info_board
+from utils import game
 
 
 def info_display():
@@ -32,7 +33,11 @@ def game_display(board):
         board: A reference to the aforementioned info board.
             Contains input data necessary to build up the game board.
     """
-    pass
+    # Initiate pygame config info.
+    game_board = game.Game(board)
+
+    # Start the main game loop.
+    game_board.game_loop()
 
 
 def main():

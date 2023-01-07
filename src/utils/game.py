@@ -54,7 +54,7 @@ class Game:
 
         self._CLOCK = pygame.time.Clock()
 
-    def update_struct(self, pos, board):
+    def update_struct(self, pos, board, action):
         """Updates the board structure according to the player's action.
 
         Changes the state of a block in the given structure if
@@ -63,6 +63,7 @@ class Game:
         Args:
             board: Dictionary mapping the game board.
             pos: Click coordinates.
+            action: the type of action, e.g. right or left click.
 
         Returns:
             An updated version of the board dictionary. It
@@ -73,8 +74,18 @@ class Game:
         # Iterate through the list and find the corresponding rect.
         for item in board.items():
             if item[1][0].collidepoint(pos):
-                board[item[0]][2] = 1
-                break
+                if action == 1 and item[1][2] == 0:
+                    board[item[0]][2] = 1
+                    break
+                if action == 2 and item[1][2] == 0:
+                    item[1][2] = 2
+                    break
+                if action == 2 and item[1][2] == 2:
+                    item[1][2] = 3
+                    break
+                if action == 2 and item[1][2] == 3:
+                    item[1][2] = 0
+                    break
         return board
 
     def is_neighbour(self, xi, xj):
@@ -320,7 +331,12 @@ class Game:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     board_structure = self.update_struct(event.pos,
-                                                         board_structure)
+                                                         board_structure,
+                                                         1)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                    board_structure = self.update_struct(event.pos,
+                                                        board_structure,
+                                                        2)
 
             # Fill the screen with white.
             self._BOARD.fill(self._WHITE)
@@ -330,6 +346,16 @@ class Game:
                 if piece[1][2] == 0:  # if it was not discovered.
                     self._BOARD.blit(
                             empty_block,
+                            piece[1][0]
+                    )
+                elif piece[1][2] == 2:
+                    self._BOARD.blit(
+                            flag,
+                            piece[1][0]
+                    )
+                elif piece[1][2] == 3:
+                    self._BOARD.blit(
+                            question,
                             piece[1][0]
                     )
                 else:  # if discovered, replace with numbered piece or bomb.

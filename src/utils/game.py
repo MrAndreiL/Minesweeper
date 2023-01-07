@@ -54,6 +54,29 @@ class Game:
 
         self._CLOCK = pygame.time.Clock()
 
+    def update_struct(self, pos, board):
+        """Updates the board structure according to the player's action.
+
+        Changes the state of a block in the given structure if
+        that certain block was actioned by the player.
+
+        Args:
+            board: Dictionary mapping the game board.
+            pos: Click coordinates.
+
+        Returns:
+            An updated version of the board dictionary. It
+            showcases the changes made by the players' action.
+        """
+        if pos[1] < self.buffer:
+            return board
+        # Iterate through the list and find the corresponding rect.
+        for item in board.items():
+            if item[1][0].collidepoint(pos):
+                board[item[0]][2] = 1
+                break
+        return board
+
     def is_neighbour(self, xi, xj):
         """Asserts if two positions are adjacent.
 
@@ -119,8 +142,8 @@ class Game:
 
         Builds a dictionary that associates the (i, j in {1, n})
         tuple position to a list consisting of a rect with the x, y
-        positions properly placed, a value in [-1, 8] and 1 or 0 if
-        discovered or not.
+        positions properly placed, a value in [-1, 8] and 0 -> undiscovered,
+        1 -> discoverd, 2 -> flag, 3 -> question mark, 4 -> bomb.
         -1 -> a bomb.
         [0, 8] -> the number of adjacent bombs.
 
@@ -129,8 +152,8 @@ class Game:
         """
         board_structure = dict()
 
-        rows = list(range(0, self._ROWS))
-        cols = list(range(0, self._COLUMNS))
+        rows = list(range(0, self._COLUMNS))
+        cols = list(range(0, self._ROWS))
         positions = [(x, y) for x in rows for y in cols]
 
         # Randomly sample out bomb positions.
@@ -160,6 +183,8 @@ class Game:
             board_structure[pos] = [rect,
                                     self.bomb_distance(pos, bomb_positions),
                                     0]
+        for el in board_structure.items():
+            print(el[1][0])
         return board_structure
 
     def game_loop(self):
@@ -189,47 +214,87 @@ class Game:
             for i in range(0, 10):
                 score = pygame.image.load(
                         os.path.join(base_path, f"assets/score_{i}.png"))
+                score = pygame.transform.scale(score,
+                                               (self._BLOCK_WIDTH,
+                                                self._BLOCK_HEIGHT)
+                                               )
                 scores.append(score)
 
             for i in range(0, 9):
                 spot = pygame.image.load(
                         os.path.join(base_path, f"assets/{i}.png"))
+                spot = pygame.transform.scale(spot,
+                                              (self._BLOCK_WIDTH,
+                                               self._BLOCK_HEIGHT)
+                                              )
                 spots.append(spot)
 
             # Smiley faces.
             smiley = pygame.image.load(
                     os.path.join(base_path, "assets/smiley.png")
             ).convert()
+            smiley = pygame.transform.scale(smiley,
+                                            (self._BLOCK_WIDTH,
+                                             self._BLOCK_HEIGHT)
+                                            )
 
             smiley_cool = pygame.image.load(
                     os.path.join(base_path, "assets/smiley_cool.png")
             ).convert()
+            smiley_cool = pygame.transform.scale(smiley_cool,
+                                                 (self._BLOCK_WIDTH,
+                                                  self._BLOCK_HEIGHT)
+                                                 )
 
             smiley_rip = pygame.image.load(
                     os.path.join(base_path, "assets/smiley_rip.png")
             ).convert()
+            smiley_rip = pygame.transform.scale(smiley_rip,
+                                                (self._BLOCK_WIDTH,
+                                                 self._BLOCK_HEIGHT)
+                                                )
 
             # Bombs.
             clicked_bomb = pygame.image.load(
                     os.path.join(base_path, "assets/bomb-at-clicked-block.png")
             ).convert()
+            clicked_bomb = pygame.transform.scale(clicked_bomb,
+                                                  (self._BLOCK_WIDTH,
+                                                   self._BLOCK_HEIGHT)
+                                                  )
 
             unclicked_bomb = pygame.image.load(
                     os.path.join(base_path, "assets/unclicked-bomb.png")
             ).convert()
+            unclicked_bomb = pygame.transform.scale(unclicked_bomb,
+                                                    (self._BLOCK_WIDTH,
+                                                     self._BLOCK_HEIGHT)
+                                                    )
 
             # Flags.
             flag = pygame.image.load(
                     os.path.join(base_path, "assets/flag.png")
             ).convert()
+            flag = pygame.transform.scale(flag,
+                                          (self._BLOCK_WIDTH,
+                                           self._BLOCK_HEIGHT)
+                                          )
 
             flag_wrong = pygame.image.load(
                     os.path.join(base_path, "assets/wrong-flag.png")
             ).convert()
+            flag_wrong = pygame.transform.scale(flag_wrong,
+                                                (self._BLOCK_WIDTH,
+                                                 self._BLOCK_HEIGHT)
+                                                )
 
             question = pygame.image.load(
                     os.path.join(base_path, "assets/question.png")
             ).convert()
+            question = pygame.transform.scale(question,
+                                              (self._BLOCK_WIDTH,
+                                               self._BLOCK_HEIGHT)
+                                              )
 
             icon = pygame.image.load(
                     os.path.join(base_path, "assets/icon.png")
@@ -242,6 +307,10 @@ class Game:
 
         # Receive game table structure.
         board_structure = self.create_game_structure()
+        print(len(board_structure))
+
+        # Game states => 0 - playing, 1 - reveal, 2 - win, 3 - dead
+        game_state = 0
 
         # Infinite game loop.
         running = True
@@ -249,6 +318,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    board_structure = self.update_struct(event.pos,
+                                                         board_structure)
 
             # Fill the screen with white.
             self._BOARD.fill(self._WHITE)
@@ -260,7 +332,17 @@ class Game:
                             empty_block,
                             piece[1][0]
                     )
-
+                else:  # if discovered, replace with numbered piece or bomb.
+                    if piece[1][1] > -1:
+                        self._BOARD.blit(
+                                spots[piece[1][1]],
+                                piece[1][0]
+                        )
+                    else:
+                        self._BOARD.blit(
+                                clicked_bomb,
+                                piece[1][0]
+                        )
             # Update the display.
             pygame.display.flip()
 

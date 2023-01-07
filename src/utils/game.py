@@ -75,7 +75,10 @@ class Game:
         for item in board.items():
             if item[1][0].collidepoint(pos):
                 if action == 1 and item[1][2] == 0:
-                    board[item[0]][2] = 1
+                    if item[1][1] == 0:
+                        board = self.cascade_effect(item[0], board)
+                    else:
+                        item[1][2] = 1
                     break
                 if action == 2 and item[1][2] == 0:
                     item[1][2] = 2
@@ -86,6 +89,33 @@ class Game:
                 if action == 2 and item[1][2] == 3:
                     item[1][2] = 0
                     break
+        return board
+
+    def cascade_effect(self, item, board):
+        """Apply a cascade effect to reveal non-bomb adjacent pieces.
+
+        After the user clicks on a piece with no bombs adjacent, apply
+        this effect to discover all adjacent similar pieces
+        and some pieces that do have bombs adjcent.
+
+        Args:
+            item: current spot to be discovered.
+            board: Game board mapped as a dictionary.
+
+        Returns:
+            A modified board dictionary with updated pieces.
+        """
+        board[item][2] = 1
+        queue = [item]
+        while len(queue) > 0:
+            # Find all neighbours of item.
+            for piece in board.keys():
+                if (self.is_neighbour(queue[0], piece) and
+                        board[piece][2] == 0):
+                    board[piece][2] = 1
+                    if board[piece][1] == 0:
+                        queue.append(piece)
+            del queue[0]
         return board
 
     def is_neighbour(self, xi, xj):
@@ -320,7 +350,7 @@ class Game:
         board_structure = self.create_game_structure()
         print(len(board_structure))
 
-        # Game states => 0 - playing, 1 - reveal, 2 - win, 3 - dead
+        # Game states => 0 - playing, 2 - win, 3 - dead/reveal
         game_state = 0
 
         # Infinite game loop.
@@ -335,8 +365,8 @@ class Game:
                                                          1)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     board_structure = self.update_struct(event.pos,
-                                                        board_structure,
-                                                        2)
+                                                         board_structure,
+                                                         2)
 
             # Fill the screen with white.
             self._BOARD.fill(self._WHITE)

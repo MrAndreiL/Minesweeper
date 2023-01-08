@@ -40,6 +40,10 @@ class Game:
         self._BOMBS = board.bombs
         self._SECONDS = board.seconds
 
+        # Counter information.
+        self._CWIDTH = 2 * self._COLUMNS
+        self._CHEIGHT = self.buffer - 1
+
         # Pygame init data and maintainance.
         pygame.init()
 
@@ -224,9 +228,40 @@ class Game:
             board_structure[pos] = [rect,
                                     self.bomb_distance(pos, bomb_positions),
                                     0]
-        for el in board_structure.items():
-            print(el[1][0])
         return board_structure
+
+    def draw_bomb_counter(self, board, flag_nr, scores):
+        """Displays the number of bombs supposedly captured by the player.
+
+        On the left side of the board, it will display an image
+        version of the number of flags left to put down in order
+        to signal a bomb. If that number reaches 0 and the bombs
+        have been idetified correctly, then the game is won. Otherwise,
+        the game continues but the flags must be taken down.
+
+        Args:
+            board: Pygame type object used to display images.
+            flag_nr: The number of flags left to place.
+            scores: An array of pygame type images.
+        """
+        flag_list = []
+        if flag_nr < 10:
+            flag_list = [0]
+            while flag_nr > 0:
+                flag_list.insert(1, flag_nr % 10)
+                flag_nr //= 10
+        else:
+            while flag_nr > 0:
+                flag_list.insert(0, flag_nr % 10)
+                flag_nr //= 10
+
+        # Display each element in the list.
+        x = 0
+        for val in flag_list:
+            rect = pygame.Rect(x, 0, self._CWIDTH, self._CHEIGHT)
+            board.blit(scores[val], rect)
+            x += self._CWIDTH
+
 
     def game_loop(self):
         """Interacts with the player and controls displaying.
@@ -256,8 +291,8 @@ class Game:
                 score = pygame.image.load(
                         os.path.join(base_path, f"assets/score_{i}.png"))
                 score = pygame.transform.scale(score,
-                                               (self._BLOCK_WIDTH,
-                                                self._BLOCK_HEIGHT)
+                                               (self._CWIDTH,
+                                                self._CHEIGHT)
                                                )
                 scores.append(score)
 
@@ -348,10 +383,12 @@ class Game:
 
         # Receive game table structure.
         board_structure = self.create_game_structure()
-        print(len(board_structure))
 
-        # Game states => 0 - playing, 2 - win, 3 - dead/reveal
+        # Game states => 0 - playing, 1 - win, 2 - dead/reveal
         game_state = 0
+
+        # Number of bomb/flag placed.
+        bomb_flag = self._BOMBS
 
         # Infinite game loop.
         running = True
@@ -360,13 +397,15 @@ class Game:
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    board_structure = self.update_struct(event.pos,
-                                                         board_structure,
-                                                         1)
+                    if game_state == 0:
+                        board_structure = self.update_struct(event.pos,
+                                                             board_structure,
+                                                             1)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                    board_structure = self.update_struct(event.pos,
-                                                         board_structure,
-                                                         2)
+                    if game_state == 0:
+                        board_structure = self.update_struct(event.pos,
+                                                             board_structure,
+                                                             2)
 
             # Fill the screen with white.
             self._BOARD.fill(self._WHITE)
@@ -399,6 +438,23 @@ class Game:
                                 clicked_bomb,
                                 piece[1][0]
                         )
+
+            # Update the number of flags placed.
+            flags_placed = 0
+            bombs_discovered = 0
+            for piece in board_structure.values():
+                if piece[2] == 2:
+                    flags_placed += 1
+                    if piece[1] == -1:
+                        bombs_discovered += 1
+
+            bomb_flag = self._BOMBS - flags_placed
+            if bombs_discovered == self._BOMBS:
+                game_state = 1
+
+            # Draw bomb/flag counter.
+            self.draw_bomb_counter(self._BOARD, bomb_flag, scores)
+
             # Update the display.
             pygame.display.flip()
 

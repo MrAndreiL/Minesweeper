@@ -44,6 +44,12 @@ class Game:
         self._CWIDTH = 2 * self._COLUMNS
         self._CHEIGHT = self.buffer - 1
 
+        # Smiley face info.
+        self._SMILEY_W = 4 * self._COLUMNS
+        self._SMILEY_H = self.buffer - 1
+        self._SMILEY_X = (self._BOARD_WIDTH // 2) - (self._SMILEY_W // 2)
+        self._SMILEY_Y = 0
+
         # Pygame init data and maintainance.
         pygame.init()
 
@@ -310,24 +316,24 @@ class Game:
                     os.path.join(base_path, "assets/smiley.png")
             ).convert()
             smiley = pygame.transform.scale(smiley,
-                                            (self._BLOCK_WIDTH,
-                                             self._BLOCK_HEIGHT)
+                                            (self._SMILEY_W,
+                                             self._SMILEY_H)
                                             )
 
             smiley_cool = pygame.image.load(
                     os.path.join(base_path, "assets/smiley_cool.png")
             ).convert()
             smiley_cool = pygame.transform.scale(smiley_cool,
-                                                 (self._BLOCK_WIDTH,
-                                                  self._BLOCK_HEIGHT)
+                                                 (self._SMILEY_W,
+                                                  self._SMILEY_H)
                                                  )
 
             smiley_rip = pygame.image.load(
                     os.path.join(base_path, "assets/smiley_rip.png")
             ).convert()
             smiley_rip = pygame.transform.scale(smiley_rip,
-                                                (self._BLOCK_WIDTH,
-                                                 self._BLOCK_HEIGHT)
+                                                (self._SMILEY_W,
+                                                 self._SMILEY_H)
                                                 )
 
             # Bombs.
@@ -390,6 +396,10 @@ class Game:
         # Number of bomb/flag placed.
         bomb_flag = self._BOMBS
 
+        # Smiley face dynamic rectangular.
+        smiley_rect = pygame.Rect(self._SMILEY_X, self._SMILEY_Y,
+                                  self._SMILEY_W, self._SMILEY_H)
+
         # Infinite game loop.
         running = True
         while running:
@@ -401,6 +411,10 @@ class Game:
                         board_structure = self.update_struct(event.pos,
                                                              board_structure,
                                                              1)
+                    if smiley_rect.collidepoint(event.pos):
+                        board_structure = self.create_game_structure()
+                        game_state = 0
+                        bomb_flag = self._BOMBS
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     if game_state == 0:
                         board_structure = self.update_struct(event.pos,
@@ -440,7 +454,7 @@ class Game:
                                     piece[1][0]
                             )
 
-            if game_state == 2:  # defeat/reveal
+            if game_state == 2 or game_state == 1:  # defeat/reveal
                 for piece in board_structure.items():
                     if piece[1][1] == -1:
                         if piece[1][2] == 1:
@@ -469,7 +483,6 @@ class Game:
                                 piece[1][0]
                         )
 
-
             # Update the number of flags placed.
             flags_placed = 0
             bombs_discovered = 0
@@ -487,6 +500,14 @@ class Game:
 
             # Draw bomb/flag counter.
             self.draw_bomb_counter(self._BOARD, bomb_flag, scores)
+
+            # Draw smiley face.
+            if game_state == 0:
+                self._BOARD.blit(smiley, smiley_rect)
+            if game_state == 1:
+                self._BOARD.blit(smiley_cool, smiley_rect)
+            if game_state == 2:
+                self._BOARD.blit(smiley_rip, smiley_rect)
 
             # Update the display.
             pygame.display.flip()

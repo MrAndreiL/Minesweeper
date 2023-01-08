@@ -411,33 +411,64 @@ class Game:
             self._BOARD.fill(self._WHITE)
 
             # Redraw pieces on table.
-            for piece in board_structure.items():
-                if piece[1][2] == 0:  # if it was not discovered.
-                    self._BOARD.blit(
-                            empty_block,
-                            piece[1][0]
-                    )
-                elif piece[1][2] == 2:
-                    self._BOARD.blit(
-                            flag,
-                            piece[1][0]
-                    )
-                elif piece[1][2] == 3:
-                    self._BOARD.blit(
-                            question,
-                            piece[1][0]
-                    )
-                else:  # if discovered, replace with numbered piece or bomb.
-                    if piece[1][1] > -1:
+            if game_state == 0:
+                for piece in board_structure.items():
+                    if piece[1][2] == 0:  # if it was not discovered.
+                        self._BOARD.blit(
+                                empty_block,
+                                piece[1][0]
+                        )
+                    elif piece[1][2] == 2:
+                        self._BOARD.blit(
+                                flag,
+                                piece[1][0]
+                        )
+                    elif piece[1][2] == 3:
+                        self._BOARD.blit(
+                                question,
+                                piece[1][0]
+                        )
+                    else:  # if discovered, replace with numbered piece or bomb
+                        if piece[1][1] > -1:
+                            self._BOARD.blit(
+                                    spots[piece[1][1]],
+                                    piece[1][0]
+                            )
+                        else:
+                            self._BOARD.blit(
+                                    clicked_bomb,
+                                    piece[1][0]
+                            )
+
+            if game_state == 2:  # defeat/reveal
+                for piece in board_structure.items():
+                    if piece[1][1] == -1:
+                        if piece[1][2] == 1:
+                            self._BOARD.blit(
+                                    clicked_bomb,
+                                    piece[1][0]
+                            )
+                        if piece[1][2] == 0:
+                            self._BOARD.blit(
+                                    unclicked_bomb,
+                                    piece[1][0]
+                            )
+                        if piece[1][2] == 2:
+                            self._BOARD.blit(
+                                    flag,
+                                    piece[1][0]
+                            )
+                        if piece[1][2] == 3:
+                            self._BOARD.blit(
+                                    question,
+                                    piece[1][0]
+                            )
+                    else:
                         self._BOARD.blit(
                                 spots[piece[1][1]],
                                 piece[1][0]
                         )
-                    else:
-                        self._BOARD.blit(
-                                clicked_bomb,
-                                piece[1][0]
-                        )
+
 
             # Update the number of flags placed.
             flags_placed = 0
@@ -447,6 +478,8 @@ class Game:
                     flags_placed += 1
                     if piece[1] == -1:
                         bombs_discovered += 1
+                if piece[1] == -1 and piece[2] == 1:  # clicked on a bomb.
+                    game_state = 2
 
             bomb_flag = self._BOMBS - flags_placed
             if bombs_discovered == self._BOMBS:

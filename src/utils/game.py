@@ -268,6 +268,30 @@ class Game:
             board.blit(scores[val], rect)
             x += self._CWIDTH
 
+    def draw_time_counter(self, board, time, scores):
+        """Displays the time counter.
+
+        On the upper right side of the screen, display a
+        decreasing time counter. If the counter reaches 0
+        and there are still bombs left, then the game
+        is considered lost.
+
+        Args:
+            board: Pygame type object used to display images.
+            time: Time to be displayed in seconds.
+            scores: An array of pygame type images.
+        """
+        time_list = []
+        while time > 0:
+            time_list.append(time % 10)
+            time //= 10
+
+        x = self._BOARD_WIDTH - self._CWIDTH
+        for val in time_list:
+            rect = pygame.Rect(x, 0, self._CWIDTH, self._CHEIGHT)
+            board.blit(scores[val], rect)
+            x -= self._CWIDTH
+
 
     def game_loop(self):
         """Interacts with the player and controls displaying.
@@ -400,26 +424,44 @@ class Game:
         smiley_rect = pygame.Rect(self._SMILEY_X, self._SMILEY_Y,
                                   self._SMILEY_W, self._SMILEY_H)
 
+        # Time counter.
+        time_left = self._SECONDS
+
+        # Control variable to test if the player started to move pieces.
+        action_made = False
+
+        # Custom event to measure time.
+        timer_event = pygame.USEREVENT + 1
+        timer_interval = 1000
+        pygame.time.set_timer(timer_event, timer_interval)
+
         # Infinite game loop.
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                if event.type == timer_event and action_made:
+                    if game_state == 0:
+                        time_left -= 1
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if game_state == 0:
                         board_structure = self.update_struct(event.pos,
                                                              board_structure,
                                                              1)
+                        action_made = True
                     if smiley_rect.collidepoint(event.pos):
                         board_structure = self.create_game_structure()
                         game_state = 0
                         bomb_flag = self._BOMBS
+                        action_made = False
+                        time_left = self._SECONDS
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     if game_state == 0:
                         board_structure = self.update_struct(event.pos,
                                                              board_structure,
                                                              2)
+                        action_made = True
 
             # Fill the screen with white.
             self._BOARD.fill(self._WHITE)
@@ -500,6 +542,13 @@ class Game:
 
             # Draw bomb/flag counter.
             self.draw_bomb_counter(self._BOARD, bomb_flag, scores)
+
+            # If the time runs out, game is lost.
+            if time_left <= 0:
+                game_state = 2
+
+            # Draw time counter.
+            self.draw_time_counter(self._BOARD, time_left, scores)
 
             # Draw smiley face.
             if game_state == 0:
